@@ -1,0 +1,452 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Django Project</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'main.js' %}" defer></script>
+</head>
+
+
+
+<style>
+    /* *############# global #######""*/ */
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+:root{
+    --global-background-color: #171717;
+    --link-background-collor: #DA0037;
+    --global-text-color: #EDEDED;
+    --text-hover-color: #444444;
+    --gray-color: rgba(255,255,255,0.1);
+}
+
+html{
+    background-color: var(--global-background-color);
+    color: var(--global-text-color);
+}
+
+a{
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--global-text-color);
+}
+
+a:hover{
+    color: var(--text-hover-color);
+}
+
+input{
+    width: 70%;
+    margin: 10px auto;
+    padding: 5px;
+    border: none;
+}
+
+input:focus{
+    border: solid 1px var(--link-background-collor);
+}
+
+/*########### header #######"*/
+
+header{
+    box-shadow: 0 10px 15px -3px var(--gray-color);
+}
+
+header nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px 30px;
+}
+
+header nav ul{
+    list-style-type: none;
+    display: inline-flex;
+}
+
+header nav ul li{
+    margin: 10px;
+}
+
+@media screen and (max-width: 640px) {
+    header nav{
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .brand{
+        margin-bottom: 30px;
+    }
+}
+
+
+/*#########   footer #######"*/
+
+footer{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding: 20px;
+    width: 100%;
+    box-shadow: 0 10px 0 15px var(--gray-color);
+}
+
+
+/*#########   modals #######"*/
+
+.modals-wrapper{
+    width: 100%;
+    height: 100%;
+    background-color: var(--global-text-color);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+}
+
+.modal{
+    background-color: var(--global-background-color);
+    min-width: 400px;
+    min-height: 400px;
+    padding: 20px;
+}
+
+#close-modal{
+    background-color: var(--link-background-collor);
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    cursor: pointer;
+    padding: 5px;
+}
+
+#login-modal, #signup-modal{
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    /* padding-top: 30%; */
+}
+
+#password-modal, #add-password-modal{
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.copy{
+    cursor: pointer;
+}
+
+
+/*#########   card #######"*/
+
+.container{
+    margin-top: 20px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 10px;
+    margin-bottom: 80px;
+}
+
+.card{
+    background-color: var(--text-hover-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.actions{
+    margin: 5px;
+}
+
+.actions a{
+    display: none;
+    background-color: var(--link-background-collor);
+    flex-direction: column;
+    padding: 5px;
+    align-items: center;
+}
+
+.actions:hover .action-item{
+    display: flex;
+}
+
+@media screen and (max-width: 680px) {
+    .container{
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media screen and (max-width: 420px) {
+    .container{
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* I added this later, didn't cover it in the tutorial*/
+
+.actions{
+    cursor: pointer;
+    border: solid 0.3px var(--link-background-collor);
+    padding: 5px;
+}
+
+/*Change the size of the modal in the small devices*/
+@media screen and (max-width: 680px) {
+    .modal{
+        min-height: 300px;
+    }
+
+    .modals-wrapper{
+        max-height: 740px;
+    }
+}
+</style>
+<body>
+    
+    <header>
+
+        <nav>
+            <div class="brand"><a href=""><i class="fa fa-lock" aria-hidden="true"></i>&nbsp;Password Manager</a></div>
+
+            <ul>
+                <li><a href="">Home</a></li>
+
+                {% if request.user.is_anonymous %}
+
+                <li><a href="javascript:;" onclick="displayModal('login-modal');">Login</a></li>
+                <li><a href="javascript:;" onclick="displayModal('signup-modal');">SignUp</a></li>
+
+                {% else %}            
+
+                <li><a href="javascript:;" onclick="document.getElementById('logout-btn').click();">Logout</a></li>
+
+                <form hidden= "true" action="." method="post">
+
+                    {% csrf_token %}
+ 
+                    <input type="submit" name="logout" id="logout-btn">
+
+
+                </form>
+
+
+                {% comment %} <li><a href="javascript:;" onclick="displayModal('password-modal');">View</a></li> {% endcomment %}
+                <li><a href="javascript:;" onclick="displayModal('add-password-modal');">Add</a></li>
+                {% endif %} 
+
+            </ul>
+        </nav>
+    </header>
+
+
+    <!--Display messages-->
+    {% if messages %}
+      <div class="messages" style="text-align: center;">
+          {% for message in messages %}
+            <p>
+                {% if message.tags == "error" %}
+                  <i class="fa fa-exclamation" aria-hidden="true"></i>
+                  {% else %}
+                  <i class="fa fa-check" aria-hidden="true"></i>
+                {% endif %}
+                &nbsp;{{message}}
+            </p>
+          {% endfor %}
+      </div>
+    {% endif %}
+
+      {% comment %} confirm email {% endcomment %}
+
+      {% if code %}
+      
+      <div style="text-align: center;">
+        <form action="." method="post", role = 'form'>
+
+            {% csrf_token %}
+
+            <h2>Please confirm your email</h2>
+
+            <p> confirm your email and get the code</p>
+
+            <input type="text" name="code" placeholder="enter the 6 digit code....">
+            <input type="text" hidden='true' name="user" value="{{user.username}}">
+            <input type="submit" name="confirm" value="confirm">
+        </form>
+      </div>
+
+
+      {% endif %}
+
+
+
+    <!-- Models -->
+    <div class="modals-wrapper">
+        <span id="close-modal" title="close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <!--login modal-->
+            <div class="modal" id="login-modal">
+            <form action="." role="form" method="POST">
+                {% csrf_token %}
+                <h2>Login</h2>
+                <input type="text" name="username" placeholder="username">
+                <input type="password" name="password" placeholder="password">
+                <input type="submit" value="login" name="login-form">
+            </form>
+            </div>
+
+    
+
+            <!--signup modal-->
+            <div class="modal" id="signup-modal">
+            <form action="." role="form" method="POST">
+                {% csrf_token %}
+                <h2>SignUp</h2>
+                <input type="text" name="username" placeholder="username">
+                <input type="email" name="email" placeholder="email">
+                
+                <input type="password" name="password" placeholder="password">
+                <input type="password" name="password2" placeholder="confirm password">
+                <input type="submit" value="register" name="signup-form">
+            </form>
+            </div>
+
+
+    
+
+            <!-- password model -->
+            <div class="modal" id="password-modal">
+            <h2> URL or Name</h2>
+                <img src="https://cdn.pixabay.com/photo/2016/04/13/14/27/google-chrome-1326908_960_720.png " width="80" height="80" alt="">
+
+                <input type="email" name="email" id="email" placeholder="email"> <i class="fas fa-copy copy" title="copy to clipboard"></i>
+                <input type="password" name="password" id="password" value="password"><i class="fas fa-copy copy" title="copy to clipboard"></i>
+            </div>
+
+
+
+            
+            <!-- add password modal -->
+            <div class="modal" id="add-password-modal">
+                <form action="." role="form" method="POST">
+                    {% csrf_token %}
+                    <h2 style="color: red;">Add new password</h2>
+                    <input type="text" name="url" placeholder="url of website">
+                    <input type="email" name="email" placeholder="email">      
+                    <input type="password" name="password" placeholder="password">
+                    <input type="submit" value="save" name="add-password">
+                </form>
+            </div>         
+        </div>
+        
+        
+        <div class="container">
+
+            <!--One card-->
+            {% for password in passwords %}
+            <div class="card">
+                <div class="actions">&nbsp;Actions <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    <a href="javascript:;" onclick="document.getElementById('delete-btn{{password.id}}').click();" class="action-item">Delete</a>
+                    <form hidden="true" action="." method="POST">
+                        {% csrf_token %}
+                        <input type="text" hidden="true" name="password-id" value="{{password.id}}">
+                        <input type="submit" id="delete-btn{{password.id}}" name="delete">
+                    </form>
+                </div>
+                <img width="50" height="50" src="{{password.logo}}" alt="">
+                <div class="name"> {{password.name}}</div>
+                <!-- password modal-->
+                <input type="email" name="email" value="{{password.email}}"><i class="fas fa-copy copy" title="copy to clipboard"></i>
+                <input type="password" name="username" value="{{password.password}}"><i class="fas fa-copy copy" title="copy to clipboard"></i>
+              
+    </div>
+            
+              
+            {% endfor %}
+
+    <footer>
+        <a href="">Link To The Project</a>
+    </footer>
+
+
+
+
+    <script>
+
+const modalWrapper = document.querySelector(".modals-wrapper");
+if (modalWrapper){
+    function displayModal(id){
+        const modal = document.getElementById(id);
+        modalWrapper.style.display = "flex";
+        modal.style.display = "flex";
+        //close modal
+        const close = document.getElementById("close-modal");
+        close.addEventListener("click", () =>{
+            modalWrapper.style.display = "none";
+            modal.style.display = "none";
+        //I added this later, didn't cover it on the tutorial
+        document.querySelector("header").style.display = "unset";
+        })
+
+        //I added this later, didn't cover it on the tutorial
+        document.querySelector("header").style.display = "none";
+    }
+}
+
+
+//copy to clipboard
+const copies = document.querySelectorAll(".copy");
+copies.forEach(copy =>{
+    copy.onclick = () =>{
+        let elemntToCopy = copy.previousElementSibling;
+        elemntToCopy.select();
+        document.execCommand("copy");
+    }
+})
+
+//I added this later, didn't cover it on the tutorial
+//Display the actions of the password card for mobile devices
+const actions = document.querySelectorAll(".actions");
+if (actions){
+    actions.forEach(action =>{
+        action.onclick = () =>{
+            const links = action.querySelectorAll("a");
+            links.forEach(link =>{
+                link.style.display = "flex";
+            })
+            setTimeout(function(){
+                links.forEach(link =>{
+                    link.style.display = "none";
+                })}
+            , 3000)
+        }
+    })
+}
+
+    </script>
+
+    
+</body>
+</html>
